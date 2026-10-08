@@ -30,6 +30,23 @@ export default async function handler(req, res) {
   });
   if (!up.ok) return res.status(502).json({ error: "fetch failed: " + up.status });
   const html = await up.text();
+    const nd = html.match(/__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/);
+  if (nd) {
+    try {
+      const pp = JSON.parse(nd[1]).props.pageProps;
+      const d = pp.oriBotDetail;
+      if (d) {
+        const assets = Array.isArray(pp.botAssets) ? pp.botAssets.map((a) => a.image).filter(Boolean) : [];
+        const tg = Array.isArray(pp.botTags) ? pp.botTags.map((t) => t.tag_name).filter(Boolean) : [];
+        return res.status(200).json({
+          name: d.char || "", image: d.char_image || assets[0] || "",
+          images: [...new Set([d.char_image, ...assets].filter(Boolean))],
+          tags: [...new Set(tg)], short: d.summary || "", worldview: d.worldview || "",
+          intro: d.char_persona || "", first: d.first_message || "", gender: d.gender || "",
+        });
+      }
+    } catch (e) {}
+  }
 
   const dec = (s) => (s || "").replace(/&amp;/g, "&").replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'")
