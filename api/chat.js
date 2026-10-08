@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     method: "POST",
     headers: { "Authorization": `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: b.model || "llama-3.3-70b-versatile",
+      model: b.model || "openai/gpt-oss-120b",
       messages: b.messages,
       temperature: b.temperature ?? 0.8,
       max_tokens: Math.min(b.max_tokens || 4096, 4096),
