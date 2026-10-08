@@ -44,9 +44,10 @@ export default async function handler(req, res) {
     .map((m) => m[0]).filter((s) => !s.includes("/blur/")))];
 
   const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    const rawName = meta("og:title") || (h1 ? dec(h1[1].replace(/<[^>]+>/g, "")) : "");
 
   return res.status(200).json({
-    name: meta("og:title") || (h1 ? dec(h1[1].replace(/<[^>]+>/g, "")) : ""),
+        name: rawName.split("|")[0].trim(),
     image: images[0] || meta("og:image") || "",
     images,
     tags,
