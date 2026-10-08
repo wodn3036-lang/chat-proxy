@@ -3,6 +3,23 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.status(200).end();
+    const listMode = String(req.query?.list || "");
+  if (listMode === "ranking" || listMode === "new") {
+    const pageUrl = listMode === "ranking" ? "https://rofan.ai/en?tab=ranking" : "https://rofan.ai/en";
+    const field = listMode === "ranking" ? "initialRankingBots" : "newReleaseBotList";
+    const pr = await fetch(pageUrl, { headers: { "User-Agent": "Mozilla/5.0 (CHAT importer)", "Accept-Language": "ko,en" } });
+    if (!pr.ok) return res.status(502).json({ error: "list fetch failed: " + pr.status });
+    const ph = await pr.text();
+    const pm = ph.match(/__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/);
+    if (!pm) return res.status(502).json({ error: "no data" });
+    let arr = [];
+    try { arr = JSON.parse(pm[1]).props.pageProps[field] || []; } catch (e) { return res.status(502).json({ error: "parse failed" }); }
+    return res.status(200).json({ list: listMode, count: arr.length, items: arr.map((b) => ({
+      id: b.bot_id, name: b.char || "", image: b.char_image || "", summary: b.summary || "",
+      tags: Array.isArray(b.tags) ? b.tags : [], users: b.user_count ?? null, chats: b.chat_count ?? null,
+      worldview: b.worldview || "", persona: b.char_persona || "",
+      url: "https://rofan.ai/en/character/" + b.bot_id })) });
+  }
   const raw = (req.query?.url || req.body?.url || "").trim();
   let u;
   try { u = new URL(raw); } catch { return res.status(400).json({ error: "bad url" }); }
