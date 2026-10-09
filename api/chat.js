@@ -17,6 +17,7 @@ export default async function handler(req, res) {
     }),
   });
   res.status(up.status);
+    const ra = up.headers.get("retry-after"); if (ra) res.setHeader("Retry-After", ra);
   const ct = up.headers.get("content-type");
   if (ct) res.setHeader("Content-Type", ct);
   res.send(Buffer.from(await up.arrayBuffer()));
