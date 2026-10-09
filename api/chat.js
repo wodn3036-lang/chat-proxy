@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       model: b.model || "openai/gpt-oss-120b",
       messages: b.messages,
       temperature: b.temperature ?? 0.8,
-      max_tokens: Math.min(b.max_tokens || 4096, 4096),
+      max_tokens: Math.min(b.max_tokens || 8192, 16384),
       stream: b.stream ?? false,
     }),
   });
